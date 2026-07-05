@@ -2,7 +2,7 @@
 
 CodePath WEB103 Final Project
 
-Designed and developed by: [your names here]
+Designed and developed by: [Gustave Ntwali, Abdul Khan, Carolina Herrera, Chau Cao, Dev Goswami, Armin Erika Polanco]
 
 🔗 Link to deployed app:
 
