@@ -6,13 +6,14 @@ Reference the Creating an Entity Relationship Diagram final project guide in the
 
 1. users
 2. artists
-3. profile
-4. follows
-5. concerts
-6. merch
-7. concert_purchases
-8. merch_purchases
+3. admin
+4. profile
+5. follows
+6. concerts
+7. merch
+8. albums
+9. purchases
 
 ## Add the Entity Relationship Diagram
 
-![sona erd](https://i.imgur.com/CiixV0q.png)
+![sona erd](https://i.imgur.com/jX0Vh5t.png)
