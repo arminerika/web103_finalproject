@@ -3,7 +3,7 @@ import pool from "../config/database.js";
 
 const router = express.Router();
 
-async function isAdminOf(userId, artistId) {
+export async function isAdminOf(userId, artistId) {
   const result = await pool.query(
     `SELECT 1 FROM admin WHERE user_id = $1 AND artist_id = $2`,
     [userId, artistId],

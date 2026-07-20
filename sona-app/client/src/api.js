@@ -45,4 +45,38 @@ export const followArtist = (userId, artistId, notify) =>
 export const unfollowArtist = (userId, artistId) =>
   request(`/follows/${artistId}?user_id=${userId}`, { method: "DELETE" });
 
-export const getPosts = (artistId) => request(`/artists/${artistId}/posts`)
+export const getPostsByArtist = (artistId) => request(`/artists/${artistId}/posts`)
+
+export const getPost = (postId) => request(`/posts/${postId}`)
+
+export const createPost = (userId, artist_id, content) => {
+  request(`/posts`, {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artist_id,
+      content: content
+    })
+  })
+}
+
+export const updatePost = (postId, userId, artistId, content) => {
+  request(`/posts/${postId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+      content: content
+    })
+  })
+}
+
+export const deletePost = (postId, userId, artistId) => {
+  request(`/posts/${postId}`, {
+    method: "DELETE",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId
+    })
+  })
+}
