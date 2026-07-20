@@ -23,27 +23,38 @@ Music fans often have to juggle multiple platforms to keep up with an artist. Fr
 
 ### Inspiration
 
-This project builds on ideas from several of our previous coursework projects. Multiple members of our group have worked on music-themed projects earlier in the course that explored artist/music reference content, vinyl and merch customization, and community-oriented spaces. **Sona** brings these ideas together into a single hub where fans can follow artists, engage with a community built around music, and shop artist merch. Furthermore, we take inspiration from existing platforms, such as Ticketmaster and Bandcamp, to build from. 
+This project builds on ideas from several of our previous coursework projects. Multiple members of our group have worked on music-themed projects earlier in the course that explored artist/music reference content, vinyl and merch customization, and community-oriented spaces. **Sona** brings these ideas together into a single hub where fans can follow artists, engage with a community built around music, and shop artist merch. Furthermore, we take inspiration from existing platforms, such as Ticketmaster and Bandcamp, to build from.
 
 ## Tech Stack
 
-Frontend: React (Vite), React Router
-
-Backend: Express, Node.js, PostgreSQL
+- Frontend: React (Vite), React Router
+- Backend: Express, Node.js, PostgreSQL
 
 ## Features
 
-### Artist Directory
+### ✅ Artist Directory
 
-- Browse all artists with genre, bio, and profile image; click into a full artist page.
+- Browse all artists with genre, bio, and profile image.
 
-- [gif goes here]
+- ![Artist Directory](https://i.imgur.com/aYOxXjl.gif)
 
-### Follow Artists
+### ✅ Follow Artists
 
-- Users can follow/unfollow artists to build a personalized list of who they're keeping up with.
+- Users can follow/unfollow artists to build a personalized list of who they're keeping up with, with an optional "notify me on release" toggle.
 
-- [gif goes here]
+- ![Follow Artists](https://i.imgur.com/foZSTEV.gif)
+
+### ✅ Artist Posts
+
+Artist Admins can post updates like new merch drops, show announcements, news, etc that will be visible to their followers.
+
+- ![Artist Posts](https://i.imgur.com/Vj749I2.gif)
+
+### ✅ Artist Quick-View Panel
+
+- Slide-out modal showing artist details and discography without navigating away from the current page.
+
+- ![Artist Quick-View Panel](https://i.imgur.com/8dW0ZTp.gif)
 
 ### Merch Shop with Filtering
 
@@ -63,15 +74,21 @@ Backend: Express, Node.js, PostgreSQL
 
 - [gif goes here]
 
-### Artist Quick-View Panel
+### Following Feed
 
-- Slide-out modal showing artist details and discography without navigating away from the current page.
+- A personalized feed combining posts, upcoming shows, and merch drops from every artist a fan follows.
 
-[gif goes here]
+- [gif goes here]
 
 ### (Stretch) Spotify Connect
 
 - Link a Spotify account to import playlists and generate personalized recommendations.
+
+- [gif goes here]
+
+### (Stretch) Sona Mix
+
+- Auto-generate a custom playlist from the artists you follow, featured right on your profile.
 
 - [gif goes here]
 
