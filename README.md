@@ -34,7 +34,7 @@ This project builds on ideas from several of our previous coursework projects. M
 
 ### ✅ Artist Directory
 
-- Browse all artists with genre, bio, and profile image.
+- Browse all artists with genre, bio, and profile image. Search bar w/ Filter by genre.
 
 - ![Artist Directory](https://i.imgur.com/aYOxXjl.gif)
 
