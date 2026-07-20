@@ -195,4 +195,29 @@ router.get("/:id/posts", async (req, res) => {
   }
 })
 
+router.post('/:id/posts', async (req, res) => {
+    const {user_id, artist_id, content} = req.body;
+
+    if (!artist_id || !content) {
+        return res.status(400).json({error: 'artist_id and content is required'})
+    }
+
+    if (!(await isAdminOf(user_id, artist_id))) {
+        return res.status(403).json({ error: "Not authorized to create a post this artist" });
+    }
+
+    try {
+        const result = await pool.query(
+            `INSERT INTO posts (artist_id, content)
+            VALUES ($1, $2)
+            RETURNING *`,
+            [artist_id, content]
+        )
+        res.status(201).json(result.rows[0])
+        console.log("new post submitted")
+    } catch (err) {
+        res.status(500).json({error: "Failed to upload post"})
+    }
+})
+
 export default router;

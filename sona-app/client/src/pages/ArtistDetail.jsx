@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import currentUser from "../currentUser.js";
-import { getArtist, getAdminOf, getFollowing, updateArtist, deleteArtist } from "../api.js";
+import { getArtist, getAdminOf, getFollowing, updateArtist, deleteArtist, getPostsByArtist } from "../api.js";
 import FollowButton from "../components/FollowButton.jsx";
+import ArtistPost from "../components/ArtistPost.jsx";
 
 function Social({ label, value }) {
   if (!value) return null;
@@ -24,11 +26,12 @@ export default function ArtistDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [artist, setArtist] = useState(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(true);
   const [following, setFollowing] = useState(null);
   const [notify, setNotify] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const [posts, setPosts] = useState({})
 
   useEffect(() => {
     getArtist(id).then((data) => {
@@ -47,6 +50,10 @@ export default function ArtistDetail() {
     });
   }, [id]);
 
+  useEffect(() => {
+    getPostsByArtist(id).then(setPosts);
+  }, [id]);
+console.log(posts)
   if (!artist || following === null) return <p>Loading...</p>;
 
   async function handleSave(event) {
@@ -143,8 +150,15 @@ export default function ArtistDetail() {
       </div>
 
       <section>
-        <h2>Posts</h2>
-        <p className="placeholder">Artist posts — coming soon (Issue 4)</p>
+        <div className="posts-titlebar">
+          <h2>Posts</h2>
+          <Link role="button" to={`/posts/create?artist=${artist.id}`}>Create</Link>
+        </div>
+        <div className="grid">
+          {posts.map((post) => (
+          <ArtistPost postDetails={post}></ArtistPost>
+          ))}
+        </div>
       </section>
 
       <section className="merch-strip">

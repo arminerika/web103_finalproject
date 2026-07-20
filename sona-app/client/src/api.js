@@ -49,12 +49,12 @@ export const getPostsByArtist = (artistId) => request(`/artists/${artistId}/post
 
 export const getPost = (postId) => request(`/posts/${postId}`)
 
-export const createPost = (userId, artist_id, content) => {
-  request(`/posts`, {
+export const createPost = (userId, artistId, content) => {
+  request(`/artists/${artistId}/posts`, {
     method: "POST",
     body: JSON.stringify({
       user_id: userId,
-      artist_id: artist_id,
+      artist_id: artistId,
       content: content
     })
   })
