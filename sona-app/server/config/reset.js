@@ -1,12 +1,12 @@
 import pool from "./database.js";
 
 const dropTables = `
-  DROP TABLE IF EXISTS posts;
-  DROP TABLE IF EXISTS follows;
-  DROP TABLE IF EXISTS admin;
-  DROP TABLE IF EXISTS profile;
-  DROP TABLE IF EXISTS artists;
-  DROP TABLE IF EXISTS users;
+  DROP TABLE IF EXISTS posts CASCADE;
+  DROP TABLE IF EXISTS follows CASCADE;
+  DROP TABLE IF EXISTS admin CASCADE;
+  DROP TABLE IF EXISTS profile CASCADE;
+  DROP TABLE IF EXISTS artists CASCADE;
+  DROP TABLE IF EXISTS users CASCADE;
 `;
 
 const createTables = `
