@@ -1,21 +1,45 @@
 import { useEffect, useState } from "react";
-import { getArtists } from "../api.js";
+import { getArtists, getFollowing } from "../api.js";
+import currentUser from "../currentUser.js";
 import ArtistCard from "../components/ArtistCard.jsx";
-
-const GENRES = ["Pop", "Rock", "Hip-Hop"];
+import QuickViewPanel from "../components/QuickViewPanel.jsx";
 
 export default function Directory() {
   const [artists, setArtists] = useState([]);
+  const [followMap, setFollowMap] = useState({});
+  const [followLoaded, setFollowLoaded] = useState(false);
   const [q, setQ] = useState("");
-  const [genre, setGenre] = useState("");
+  const [genreOptions, setGenreOptions] = useState([]);
+  const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedArtist, setSelectedArtist] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    getArtists().then((all) => {
+      const unique = [...new Set(all.map((a) => a.genre).filter(Boolean))];
+      setGenreOptions(unique);
+    });
+  }, []);
+
+  useEffect(() => {
     setLoading(true);
-    getArtists({ q, genre })
+    getArtists({ q, genre: selectedGenre })
       .then(setArtists)
       .finally(() => setLoading(false));
-  }, [q, genre]);
+  }, [q, selectedGenre]);
+
+  useEffect(() => {
+    getFollowing(currentUser.id).then((rows) => {
+      const map = {};
+      for (const row of rows) {
+        map[row.id] = { following: true, notify: row.notify_on_release };
+      }
+      setFollowMap(map);
+      setFollowLoaded(true);
+    });
+  }, []);
+
+  const ready = !loading && followLoaded;
 
   return (
     <section>
@@ -28,25 +52,41 @@ export default function Directory() {
           value={q}
           onChange={(event) => setQ(event.target.value)}
         />
-        <select value={genre} onChange={(event) => setGenre(event.target.value)}>
+        <select
+          value={selectedGenre}
+          onChange={(event) => setSelectedGenre(event.target.value)}
+        >
           <option value="">Genre Dropdown</option>
-          {GENRES.map((option) => (
-            <option key={option} value={option}>{option}</option>
+          {genreOptions.map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
           ))}
         </select>
       </div>
 
-      {loading ? (
+      {!ready ? (
         <p>Loading...</p>
       ) : artists.length === 0 ? (
         <p>No artists found.</p>
       ) : (
         <div className="grid">
           {artists.map((artist) => (
-            <ArtistCard key={artist.id} artist={artist} />
+            <ArtistCard
+              key={artist.id}
+              artist={artist}
+              onQuickView={() => setSelectedArtist(artist)}
+              initialFollowing={followMap[artist.id]?.following ?? false}
+              initialNotify={followMap[artist.id]?.notify ?? false}
+            />
           ))}
         </div>
       )}
+
+      <QuickViewPanel
+        artist={selectedArtist}
+        onClose={() => setSelectedArtist(null)}
+      />
     </section>
   );
 }

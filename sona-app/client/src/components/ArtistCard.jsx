@@ -1,6 +1,12 @@
 import { Link } from "react-router-dom";
+import FollowButton from "./FollowButton.jsx";
 
-export default function ArtistCard({ artist }) {
+export default function ArtistCard({
+  artist,
+  onQuickView,
+  initialFollowing = false,
+  initialNotify = false,
+}) {
   return (
     <div className="card">
       <Link to={`/artists/${artist.id}`} className="card-link">
@@ -11,9 +17,14 @@ export default function ArtistCard({ artist }) {
       {artist.genre && <span className="genre-tag">{artist.genre}</span>}
 
       <div className="card-actions">
-        <button type="button" className="btn-outline" disabled>
+        <button className="btn-outline" onClick={onQuickView}>
           Quick View
         </button>
+        <FollowButton
+          artistId={artist.id}
+          initialFollowing={initialFollowing}
+          initialNotify={initialNotify}
+        />
       </div>
     </div>
   );

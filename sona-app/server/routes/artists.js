@@ -3,7 +3,7 @@ import pool from "../config/database.js";
 
 const router = express.Router();
 
-async function isAdminOf(userId, artistId) {
+export async function isAdminOf(userId, artistId) {
   const result = await pool.query(
     `SELECT 1 FROM admin WHERE user_id = $1 AND artist_id = $2`,
     [userId, artistId],
@@ -29,7 +29,13 @@ router.get("/", async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT * FROM artists ${where} ORDER BY name`,
+      `SELECT artists.*,
+              profile.description, profile.instagram, profile.twitter,
+              profile.facebook, profile.tiktok, profile.spotify
+       FROM artists
+       LEFT JOIN profile ON profile.artist_id = artists.id
+       ${where}
+       ORDER BY artists.name`,
       values,
     );
     res.json(result.rows);
@@ -213,5 +219,52 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({ error: "Failed to delete artist" });
   }
 });
+
+router.get("/:id/posts", async (req, res) => {
+  const {id} = req.params;
+
+  try {
+    const postResult = await pool.query(
+      `SELECT artists.id,
+              artists.name,
+              posts.content,
+              posts.created_at AS posted_on
+      FROM artists
+      JOIN posts ON artists.id = posts.artist_id
+      WHERE artist_id = $1
+      ORDER BY posts.created_at DESC`,
+      [id]
+    )
+    res.json(postResult.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Failed to fetch posts" });
+  }
+})
+
+router.post('/:id/posts', async (req, res) => {
+    const {user_id, artist_id, content} = req.body;
+
+    if (!artist_id || !content) {
+        return res.status(400).json({error: 'artist_id and content is required'})
+    }
+
+    if (!(await isAdminOf(user_id, artist_id))) {
+        return res.status(403).json({ error: "Not authorized to create a post this artist" });
+    }
+
+    try {
+        const result = await pool.query(
+            `INSERT INTO posts (artist_id, content)
+            VALUES ($1, $2)
+            RETURNING *`,
+            [artist_id, content]
+        )
+        res.status(201).json(result.rows[0])
+        console.log("new post submitted")
+    } catch (err) {
+        res.status(500).json({error: "Failed to upload post"})
+    }
+})
 
 export default router;

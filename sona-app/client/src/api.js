@@ -30,6 +30,58 @@ export const deleteArtist = (id, userId) =>
 
 export const getAdminOf = (userId) => request(`/users/${userId}/admin-of`);
 
+export const getFollowing = (userId) => request(`/users/${userId}/following`);
+
+export const followArtist = (userId, artistId, notify) =>
+  request(`/follows`, {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+      notify_on_release: notify,
+    }),
+  });
+
+export const unfollowArtist = (userId, artistId) =>
+  request(`/follows/${artistId}?user_id=${userId}`, { method: "DELETE" });
+
+export const getPostsByArtist = (artistId) =>
+  request(`/artists/${artistId}/posts`);
+
+export const getPost = (postId) => request(`/posts/${postId}`);
+
+export const createPost = (userId, artistId, content) => {
+  return request(`/artists/${artistId}/posts`, {
+    method: "POST",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+      content: content,
+    }),
+  });
+};
+
+export const updatePost = (postId, userId, artistId, content) => {
+  return request(`/posts/${postId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+      content: content,
+    }),
+  });
+};
+
+export const deletePost = (postId, userId, artistId) => {
+  return request(`/posts/${postId}`, {
+    method: "DELETE",
+    body: JSON.stringify({
+      user_id: userId,
+      artist_id: artistId,
+    }),
+  });
+};
+
 export const getMerch = ({ artist_id = "", type = "", sort = "" } = {}) => {
   const params = new URLSearchParams();
   if (artist_id) params.set("artist_id", artist_id);
@@ -39,10 +91,14 @@ export const getMerch = ({ artist_id = "", type = "", sort = "" } = {}) => {
   return request(`/merch${qs ? `?${qs}` : ""}`);
 };
 
-export const getArtistMerch = (artistId) => request(`/artists/${artistId}/merch`);
+export const getArtistMerch = (artistId) =>
+  request(`/artists/${artistId}/merch`);
 
 export const createMerch = (artistId, data) =>
-  request(`/artists/${artistId}/merch`, { method: "POST", body: JSON.stringify(data) });
+  request(`/artists/${artistId}/merch`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
 
 export const updateMerch = (id, data) =>
   request(`/merch/${id}`, { method: "PATCH", body: JSON.stringify(data) });

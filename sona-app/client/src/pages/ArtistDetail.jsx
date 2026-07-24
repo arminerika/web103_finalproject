@@ -1,8 +1,22 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, Link } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+  useSearchParams,
+  Link,
+} from "react-router-dom";
 import currentUser from "../currentUser.js";
-import { getArtist, getAdminOf, updateArtist, deleteArtist } from "../api.js";
-import { getArtistMerch } from "../api.js";
+import {
+  getArtist,
+  getAdminOf,
+  getFollowing,
+  updateArtist,
+  deleteArtist,
+  getPostsByArtist,
+  getArtistMerch,
+} from "../api.js";
+import FollowButton from "../components/FollowButton.jsx";
+import ArtistPost from "../components/ArtistPost.jsx";
 import MerchCard from "../components/MerchCard.jsx";
 import CreateMerchForm from "../components/CreateMerchForm.jsx";
 import Toast from "../components/Toast.jsx";
@@ -32,12 +46,18 @@ export default function ArtistDetail() {
   const navigate = useNavigate();
   const [artist, setArtist] = useState(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [following, setFollowing] = useState(null);
+  const [notify, setNotify] = useState(false);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
+  const [posts, setPosts] = useState([]);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [toast, setToast] = useState("");
   const [merch, setMerch] = useState([]);
   const [merchLoading, setMerchLoading] = useState(true);
   const [showCreateMerch, setShowCreateMerch] = useState(false);
-  const [toast, setToast] = useState("");
+
+  let new_post = searchParams.get("new_post") === "true";
 
   useEffect(() => {
     getArtist(id).then((data) => {
@@ -49,14 +69,31 @@ export default function ArtistDetail() {
     getAdminOf(currentUser.id).then((administered) => {
       setIsAdmin(administered?.id === Number(id));
     });
-    setMerchLoading(true);
-    getArtistMerch(id)
-    .then(setMerch)
-    .finally(() => setMerchLoading(false));
+    getFollowing(currentUser.id).then((rows) => {
+      const match = rows.find((row) => row.id === Number(id));
+      setFollowing(Boolean(match));
+      setNotify(match?.notify_on_release ?? false);
+    });
   }, [id]);
 
+  useEffect(() => {
+    getPostsByArtist(id).then(setPosts);
+    setMerchLoading(true);
+    getArtistMerch(id)
+      .then(setMerch)
+      .finally(() => setMerchLoading(false));
+  }, [id]);
 
-  if (!artist) return <p>Loading...</p>;
+  useEffect(() => {
+    if (new_post) {
+      showToast("Post published");
+      const params = new URLSearchParams(searchParams);
+      params.delete("new_post");
+      setSearchParams(params, { replace: true });
+    }
+  }, [new_post, searchParams, setSearchParams]);
+
+  if (!artist || following === null) return <p>Loading...</p>;
 
   async function handleSave(event) {
     event.preventDefault();
@@ -74,6 +111,11 @@ export default function ArtistDetail() {
     navigate("/");
   }
 
+  function showToast(message) {
+    setToast(message);
+    setTimeout(() => setToast(""), 2000);
+  }
+
   return (
     <article>
       <div className="detail-hero">
@@ -86,16 +128,33 @@ export default function ArtistDetail() {
           {artist.genre && <span className="genre-tag">{artist.genre}</span>}
         </div>
 
-        {isAdmin && !editing && (
-          <div className="admin-controls">
-            <button type="button" onClick={() => setEditing(true)}>
-              Edit
-            </button>
-            <button type="button" onClick={handleDelete} className="btn-danger">
-              Delete
-            </button>
-          </div>
-        )}
+        <div className="titlebar-actions">
+          {!isAdmin && (
+            <FollowButton
+              artistId={artist.id}
+              initialFollowing={following}
+              initialNotify={notify}
+            />
+          )}
+          {isAdmin && !editing && (
+            <div className="admin-controls">
+              <button
+                type="button"
+                className="btn"
+                onClick={() => setEditing(true)}
+              >
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="btn-danger"
+              >
+                Delete
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {isAdmin && editing && (
@@ -118,8 +177,14 @@ export default function ArtistDetail() {
             ),
           )}
           <div className="admin-controls">
-            <button type="submit">Save</button>
-            <button type="button" onClick={() => setEditing(false)}>
+            <button type="submit" className="btn">
+              Save
+            </button>
+            <button
+              type="button"
+              className="btn-outline"
+              onClick={() => setEditing(false)}
+            >
               Cancel
             </button>
           </div>
@@ -134,7 +199,7 @@ export default function ArtistDetail() {
           <div className="social-row">
             <Social label="IG" value={artist.instagram} />
             <Social label="X" value={artist.twitter} />
-            <Social label="f" value={artist.facebook} />
+            <Social label="FB" value={artist.facebook} />
             <Social label="TT" value={artist.tiktok} />
           </div>
 
@@ -159,8 +224,23 @@ export default function ArtistDetail() {
       </div>
 
       <section>
-        <h2>Posts</h2>
-        <p className="placeholder">Artist posts — coming soon (Issue 4)</p>
+        <div className="posts-titlebar">
+          <h2>Posts</h2>
+          {isAdmin && (
+            <Link
+              className="btn"
+              role="button"
+              to={`/posts/create?artist=${artist.id}`}
+            >
+              Create
+            </Link>
+          )}
+        </div>
+        <div className="grid">
+          {posts.map((post) => (
+            <ArtistPost key={post.id} postDetails={post} isAdmin={isAdmin} />
+          ))}
+        </div>
       </section>
 
       <section className="merch-strip">
@@ -213,7 +293,7 @@ export default function ArtistDetail() {
         )}
       </section>
 
-      <Toast message={toast} />
+      {toast && <span className="toast">{toast}</span>}
     </article>
   );
 }
