@@ -15,6 +15,7 @@ function App() {
           </Link>
           <div className="nav-right">
             <Link to="/profile">Profile</Link>
+            <Link to="/merch">Merch</Link>
             <span className="cart">🛒</span>
           </div>
         </div>

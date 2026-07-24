@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { Link } from "react-router-dom";
+import {
+  useParams,
+  useNavigate,
+  useSearchParams,
+  Link,
+} from "react-router-dom";
 import currentUser from "../currentUser.js";
 import {
   getArtist,
@@ -9,9 +13,13 @@ import {
   updateArtist,
   deleteArtist,
   getPostsByArtist,
+  getArtistMerch,
 } from "../api.js";
 import FollowButton from "../components/FollowButton.jsx";
 import ArtistPost from "../components/ArtistPost.jsx";
+import MerchCard from "../components/MerchCard.jsx";
+import CreateMerchForm from "../components/CreateMerchForm.jsx";
+import Toast from "../components/Toast.jsx";
 
 function Social({ label, value }) {
   if (!value) return null;
@@ -45,6 +53,9 @@ export default function ArtistDetail() {
   const [posts, setPosts] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [toast, setToast] = useState("");
+  const [merch, setMerch] = useState([]);
+  const [merchLoading, setMerchLoading] = useState(true);
+  const [showCreateMerch, setShowCreateMerch] = useState(false);
 
   let new_post = searchParams.get("new_post") === "true";
 
@@ -67,6 +78,10 @@ export default function ArtistDetail() {
 
   useEffect(() => {
     getPostsByArtist(id).then(setPosts);
+    setMerchLoading(true);
+    getArtistMerch(id)
+      .then(setMerch)
+      .finally(() => setMerchLoading(false));
   }, [id]);
 
   useEffect(() => {
@@ -231,9 +246,51 @@ export default function ArtistDetail() {
       <section className="merch-strip">
         <div className="merch-head">
           <h2>Merch</h2>
-          <span className="placeholder">See All →</span>
+          <Link to="/merch">See All →</Link>
         </div>
-        <p className="placeholder">Merch cards — coming soon (Issue 6)</p>
+
+        {isAdmin && !showCreateMerch && (
+          <button type="button" onClick={() => setShowCreateMerch(true)}>
+            Add Merch
+          </button>
+        )}
+
+        {isAdmin && showCreateMerch && (
+          <CreateMerchForm
+            artistId={id}
+            onCreated={(created) => {
+              setMerch((prev) => [created, ...prev]);
+              setToast("Merch created!");
+              setTimeout(() => setToast(""), 3000);
+            }}
+          />
+        )}
+
+        {merchLoading ? (
+          <p>Loading...</p>
+        ) : merch.length === 0 ? (
+          <p className="placeholder">No merch yet.</p>
+        ) : (
+          <div className="grid">
+            {merch.map((item) => (
+              <MerchCard
+                key={item.id}
+                merch={item}
+                isAdmin={isAdmin}
+                onUpdated={(updated) => {
+                  setMerch((prev) =>
+                    prev.map((m) => (m.id === updated.id ? updated : m)),
+                  );
+                  setToast("Merch updated!");
+                  setTimeout(() => setToast(""), 3000);
+                }}
+                onDeleted={(deletedId) => {
+                  setMerch((prev) => prev.filter((m) => m.id !== deletedId));
+                }}
+              />
+            ))}
+          </div>
+        )}
       </section>
 
       {toast && <span className="toast">{toast}</span>}

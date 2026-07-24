@@ -3,6 +3,7 @@ import pool from "./database.js";
 const dropTables = `
   DROP TABLE IF EXISTS posts CASCADE;
   DROP TABLE IF EXISTS follows CASCADE;
+  DROP TABLE IF EXISTS merch CASCADE;
   DROP TABLE IF EXISTS admin CASCADE;
   DROP TABLE IF EXISTS profile CASCADE;
   DROP TABLE IF EXISTS artists CASCADE;
@@ -22,6 +23,17 @@ const createTables = `
     name VARCHAR(100) NOT NULL,
     genre VARCHAR(50),
     photo VARCHAR(255),
+    created_at TIMESTAMP DEFAULT NOW()
+  );
+
+  CREATE TABLE merch (
+    id SERIAL PRIMARY KEY,
+    artist_id INTEGER NOT NULL REFERENCES artists(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    type VARCHAR(100) NOT NULL,
+    price NUMERIC(10, 2) NOT NULL,
+    photo VARCHAR(255),
+    stock INTEGER NOT NULL DEFAULT 0,
     created_at TIMESTAMP DEFAULT NOW()
   );
 
@@ -93,6 +105,20 @@ async function seed() {
     const [artist1, artist2, artist3, artist4, artist5, artist6, artist7] =
       artists.rows;
 
+    console.log("Seeding merch...");
+    await client.query(
+      `INSERT INTO merch (artist_id, name, type, price, photo, stock) VALUES
+    ($1, 'Tour T-Shirt', 'apparel', 25.00, 'https://picsum.photos/seed/merch1/400/400', 50),
+    ($1, 'Vinyl Record', 'music', 30.00, 'https://picsum.photos/seed/merch2/400/400', 20),
+    ($2, 'Hoodie', 'apparel', 45.00, 'https://picsum.photos/seed/merch3/400/400', 30),
+    ($2, 'Poster', 'accessory', 15.00, 'https://picsum.photos/seed/merch4/400/400', 100),
+    ($3, 'Snapback Hat', 'apparel', 28.00, 'https://picsum.photos/seed/merch5/400/400', 40),
+    ($4, 'Band Tee', 'apparel', 35.00, 'https://picsum.photos/seed/merch6/400/400', 25),
+    ($5, 'Concert Ticket', 'accessory', 50.00, 'https://picsum.photos/seed/merch7/400/400', 10)
+  `,
+      [artist1.id, artist2.id, artist3.id, artist4.id, artist5.id],
+    );
+
     console.log("Seeding profiles...");
     await client.query(
       `INSERT INTO profile (artist_id, description, instagram, twitter, facebook, tiktok, spotify) VALUES
@@ -134,7 +160,7 @@ async function seed() {
         ($2, 'Placeholder post from Test Artist 2.'),
         ($3, 'Placeholder post from Test Artist 3.')
       `,
-      [artist1.id, artist2.id, artist4.id],
+      [artist1.id, artist2.id, artist3.id],
     );
 
     console.log("✅ Database reset and seeded successfully.");
