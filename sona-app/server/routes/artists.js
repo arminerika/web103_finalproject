@@ -57,10 +57,13 @@ router.get('/:id/merch', async (req, res) => {
 router.post('/:id/merch', async (req, res) => {
   try {
     const artistId = req.params.id;
-    const authorized = await isAdminOf(req.user.id, artistId);
-    if (!authorized) return res.status(403).json({ error: 'Not authorized' });
+    const { user_id, name, type, price, photo, stock } = req.body;
 
-    const { name, type, price, photo, stock } = req.body;
+    if (!user_id) return res.status(400).json({ error: 'user_id is required' });
+
+    if (!(await isAdminOf(user_id, artistId))) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
     if (!name || !type || price === undefined) {
       return res.status(400).json({ error: 'name, type, and price are required' });
     }

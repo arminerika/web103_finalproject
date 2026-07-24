@@ -49,16 +49,22 @@ router.get('/', async (req, res) => {
 // PATCH /api/merch/:id
 router.patch('/:id', async (req, res) => {
   try {
+    const { user_id, name, type, price, photo, stock } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ error: 'user_id is required' });
+    }
+
     const { rows: existing } = await pool.query(
       'SELECT artist_id FROM merch WHERE id = $1',
       [req.params.id]
     );
     if (!existing.length) return res.status(404).json({ error: 'Merch not found' });
 
-    const authorized = await isAdminOf(req.user.id, existing[0].artist_id);
-    if (!authorized) return res.status(403).json({ error: 'Not authorized' });
+    if (!(await isAdminOf(user_id, existing[0].artist_id))) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
 
-    const { name, type, price, photo, stock } = req.body;
     const { rows } = await pool.query(
       `UPDATE merch SET
          name = COALESCE($1, name),
@@ -76,17 +82,25 @@ router.patch('/:id', async (req, res) => {
   }
 });
 
+
 // DELETE /api/merch/:id
 router.delete('/:id', async (req, res) => {
   try {
+    const { user_id } = req.body;
+
+    if (!user_id) {
+      return res.status(400).json({ error: 'user_id is required' });
+    }
+
     const { rows: existing } = await pool.query(
       'SELECT artist_id FROM merch WHERE id = $1',
       [req.params.id]
     );
     if (!existing.length) return res.status(404).json({ error: 'Merch not found' });
 
-    const authorized = await isAdminOf(req.user.id, existing[0].artist_id);
-    if (!authorized) return res.status(403).json({ error: 'Not authorized' });
+    if (!(await isAdminOf(user_id, existing[0].artist_id))) {
+      return res.status(403).json({ error: 'Not authorized' });
+    }
 
     await pool.query('DELETE FROM merch WHERE id = $1', [req.params.id]);
     res.status(204).send();
